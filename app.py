@@ -10,6 +10,7 @@ Token = os.getenv("bot_token")
 
 
 class aClient(discord.Client):
+
     def __init__(self):
         super().__init__(intents=discord.Intents.default())
         self.synced = False
