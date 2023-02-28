@@ -1,51 +1,55 @@
-const {REST, Routes} = require('discord.js');
-const fs = require('node:fs');
+const { REST, Routes } = require("discord.js");
+const fs = require("node:fs");
 
-const clientId = '1079930649231757312';
-const guildId = '766913043698942022';
+const clientId = "1079930649231757312";
+const guildId = "766913043698942022";
 
 module.exports = (client) => {
   client.handleCommands = (commandFolders, path) => {
     client.commandArray = [];
     for (folder of commandFolders) {
-      const commandFiles = fs.readdirSync(`${path}/${folder}`)
-                               .filter(file => file.endsWith('.js'));
+      const commandFiles = fs
+        .readdirSync(`${path}/${folder}`)
+        .filter((file) => file.endsWith(".js"));
       for (const file of commandFiles) {
         const command = require(`../commands/${folder}/${file}`);
         // Set a new item in the Collection with the key as the command name and
         // the value as the exported module
-        if ('data' in command && 'execute' in command) {
+        if ("data" in command && "execute" in command) {
           client.commands.set(command.data.name, command);
           client.commandArray.push(command.data.toJSON());
         } else {
-          console.log(`[WARNING] The command at ${path}/${folder}/${
-              file} is missing a required "data" or "execute" property.`);
+          console.log(
+            `[WARNING] The command at ${path}/${folder}/${file} is missing a required "data" or "execute" property.`
+          );
         }
       }
     }
 
     // Construct and prepare an instance of the REST module
-    const rest = new REST({version : '10'}).setToken(process.env.TOKEN);
+    const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
 
     // and deploy your commands!
     (async () => {
       try {
-        console.log(`Started refreshing ${
-            client.commandArray.length} application (/) commands.`);
+        console.log(
+          `Started refreshing ${client.commandArray.length} application (/) commands.`
+        );
 
         // The put method is used to fully refresh all commands in the guild
         // with the current set
         const data = await rest.put(
-            Routes.applicationGuildCommands(clientId, guildId),
-            {body : client.commandArray},
+          Routes.applicationGuildCommands(clientId, guildId),
+          { body: client.commandArray }
         );
 
         console.log(
-            `Successfully reloaded ${data.length} application (/) commands.`);
+          `Successfully reloaded ${data.length} application (/) commands.`
+        );
       } catch (error) {
         // And of course, make sure you catch and log any errors!
         console.error(error);
       }
     })();
   };
-}
+};
