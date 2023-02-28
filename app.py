@@ -29,4 +29,5 @@ tree = app_commands.CommandTree(client)
 async def self(interaction: discord.Interaction, name: str):
     await interaction.response.send_message(f"Hello {name}")
 
+
 client.run(Token)
